@@ -1,9 +1,11 @@
-// 確保優先讀取 .env 檔案
 require('dotenv').config();
 
+// 💡 企業級防護：自動清除環境變數中可能誤夾帶的空白字元與引號
+const rawUrl = process.env.FHIR_BASE_URL || 'https://hapi.fhir.org/baseR4';
+const cleanUrl = rawUrl.replace(/['"]/g, '').trim();
+
 module.exports = {
-    // 改為動態讀取環境變數，若無則給予預設值
-    FHIR_BASE_URL: process.env.FHIR_BASE_URL || 'https://hapi.fhir.org/baseR4',
+    FHIR_BASE_URL: cleanUrl,
     PORT: process.env.PORT || 3000,
     PROFILES: {
         ORGANIZATION: "https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition/Organization-twcore",
