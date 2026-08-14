@@ -1,11 +1,23 @@
 require('dotenv').config();
 
-// 💡 企業級防護：自動清除環境變數中可能誤夾帶的空白字元與引號
-const rawUrl = process.env.FHIR_BASE_URL || 'https://hapi.fhir.org/baseR4';
-const cleanUrl = rawUrl.replace(/['"]/g, '').trim();
+// 💡 終極防護：確保 URL 絕對合法
+let safeFhirUrl = 'https://hapi.fhir.org/baseR4'; // 最安全的預設網址
+
+try {
+    const rawUrl = process.env.FHIR_BASE_URL;
+    if (rawUrl) {
+        // 清理多餘的單雙引號與前後空白
+        const cleaned = rawUrl.replace(/['"]/g, '').trim();
+        // 嘗試用 Node 的 URL 物件強制解析，若格式不對(如漏掉 https://)會直接報錯跳到 catch
+        new URL(cleaned); 
+        safeFhirUrl = cleaned;
+    }
+} catch (error) {
+    console.error('⚠️ 環境變數 FHIR_BASE_URL 格式異常，已強制切換為預設網址！');
+}
 
 module.exports = {
-    FHIR_BASE_URL: cleanUrl,
+    FHIR_BASE_URL: safeFhirUrl,
     PORT: process.env.PORT || 3000,
     PROFILES: {
         ORGANIZATION: "https://twcore.mohw.gov.tw/ig/twcore/StructureDefinition/Organization-twcore",
